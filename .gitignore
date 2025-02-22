@@ -1,0 +1,10 @@
+.specstory/*
+env/
+
+*.md
+
+Chat/htdocs-export-reader-main/*
+
+
+TriarErr/
+TrialErr/

@@ -1,0 +1,23 @@
+{
+    "api": {
+        "base_url": "http://localhost:8000",
+        "machine_id": "VM001",
+        "timeout": 5,
+        "retry_attempts": 3,
+        "retry_delay": 1
+    },
+    "hardware": {
+        "flow_sensor_pin": 20,
+        "motor_pin": 21,
+        "esp32_ip": "192.168.137.111",
+        "esp32_port": 80,
+        "ir_sensor_pin": 24,
+        "pulse_per_liter": 500
+    },
+    "app": {
+        "video_path": "yqq.mp4",
+        "log_file": "vending_machine.log",
+        "log_level": "INFO",
+        "update_interval": 2
+    }
+}

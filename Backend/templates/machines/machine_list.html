@@ -1,0 +1,136 @@
+<!-- machine_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Stats Overview -->
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Machines Status</h2>
+            <p class="text-gray-500">Real-time monitoring of all vending machines</p>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="flex space-x-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="text-sm text-gray-500">Total Machines</div>
+                <div class="text-xl font-bold">{{ total_machines }}</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="text-sm text-gray-500">Online</div>
+                <div class="text-xl font-bold text-green-600">{{ online_machines }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+        <form method="get" class="flex space-x-4">
+            <div class="flex-1">
+                <input type="text" 
+                       name="search" 
+                       value="{{ search }}"
+                       placeholder="Search machines..." 
+                       class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <select name="status" 
+                    class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">All Status</option>
+                <option value="online" {% if status == 'online' %}selected{% endif %}>Online</option>
+                <option value="offline" {% if status == 'offline' %}selected{% endif %}>Offline</option>
+                <option value="maintenance" {% if status == 'maintenance' %}selected{% endif %}>Maintenance</option>
+            </select>
+            <button type="submit" 
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Apply
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Machine Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="machines-container">
+    {% for machine in machines %}
+    <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-2 h-2 rounded-full bg-{% if machine.status == 'online' %}green{% else %}red{% endif %}-500"></div>
+                <div>
+                    <h3 class="font-semibold text-gray-800">{{ machine.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ machine.location }}</p>
+                </div>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full 
+                       {% if machine.status == 'online' %}bg-green-100 text-green-800
+                       {% elif machine.status == 'maintenance' %}bg-yellow-100 text-yellow-800
+                       {% else %}bg-red-100 text-red-800{% endif %}">
+                {{ machine.status|title }}
+            </span>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="text-center">
+                <div class="text-sm text-gray-500">TDS</div>
+                <div class="font-semibold">{{ machine.latest_quality.tds_level|default:"--" }} ppm</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm text-gray-500">pH</div>
+                <div class="font-semibold">{{ machine.latest_quality.ph_level|default:"--" }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm text-gray-500">Water Level</div>
+                <div class="font-semibold">{{ machine.latest_quality.water_level|default:"--" }}%</div>
+            </div>
+        </div>
+        
+        <div class="border-t pt-4">
+            <a href="{% url 'machine_detail' machine.id %}" 
+               class="w-full block text-center p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                View Details
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-12 bg-white rounded-lg">
+        <p class="text-gray-500">No machines found</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="mt-6 flex justify-center">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}" 
+           class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            Previous
+        </a>
+        {% endif %}
+        
+        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}" 
+           class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            Next
+        </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+
+<!-- Add auto-refresh functionality -->
+<script>
+function refreshMachineData() {
+    const container = document.getElementById('machines-container');
+    // Reload the current page to get fresh data
+    location.reload();
+}
+
+// Refresh every 30 seconds
+setInterval(refreshMachineData, 30000);
+</script>
+{% endblock %}

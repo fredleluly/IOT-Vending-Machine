@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Machines Status</h2>
+        <p class="text-gray-500">Real-time monitoring of all vending machines</p>
+    </div>
+</div>
+
+<div class="space-y-4" id="machines-container">
+    {% for machine in machines %}
+    <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4 w-1/4">
+                <div class="w-2 h-2 rounded-full bg-{% if machine.status == 'online' %}green{% else %}red{% endif %}-500"></div>
+                <div>
+                    <h3 class="font-semibold text-gray-800">{{ machine.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ machine.location }}</p>
+                </div>
+            </div>
+            
+            <div class="flex space-x-8 w-2/4">
+                <div>
+                    <div class="text-sm text-gray-500">TDS</div>
+                    <div class="font-semibold">{{ machine.latest_quality.tds_level|default:"--" }} ppm</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">pH</div>
+                    <div class="font-semibold">{{ machine.latest_quality.ph_level|default:"--" }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">Water Level</div>
+                    <div class="font-semibold">{{ machine.latest_quality.water_level|default:"--" }}%</div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4 w-1/4 justify-end">
+                <a href="{% url 'machine_detail' machine.id %}" 
+                   class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                    View Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
