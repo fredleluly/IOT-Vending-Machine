@@ -24,6 +24,8 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QUrl, QSize
 from PyQt5.QtGui import QFont, QIcon
 import logging
 
+DEVELOPMENT_1 = True
+
 
 # Setup logging with proper configuration
 logging.basicConfig(
@@ -1083,6 +1085,14 @@ class VideoThread(QThread):
         with QMutexLocker(self.mutex):
             self.running = False
 
+import websocket
+import json
+import threading
+import time
+import logging
+from PyQt5.QtCore import QThread, QObject, pyqtSignal
+
+# Class SensorThread yang sudah diupdate untuk WebSocket
 class SensorThread(QThread):
     sensor_updated = pyqtSignal(dict)
     
@@ -1093,89 +1103,186 @@ class SensorThread(QThread):
         self.esp32_ip = esp32_ip
         self.running = True
         self._last_successful_data = None
+        self._ws = None
+        self._reconnect_delay = 2
+        self._max_reconnect_delay = 30
+        self._lock = threading.Lock()
         
+    def _on_message(self, ws, message):
+        try:
+            data = json.loads(message)
+            if data.get('type') == 'heartbeat':
+                return
+            with self._lock:
+                self._last_successful_data = data
+            self.sensor_updated.emit(data)
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding WebSocket message: {e}")
+        except Exception as e:
+            logger.error(f"Error handling WebSocket message: {e}")
+
+    def _on_error(self, ws, error):
+        logger.error(f"WebSocket error: {error}")
+        if self._last_successful_data:
+            self.sensor_updated.emit({
+                **self._last_successful_data,
+                'stale': True
+            })
+        else:
+            self.sensor_updated.emit({'error': True})
+
+    def _on_close(self, ws, close_status_code, close_msg):
+        logger.warning(f"WebSocket connection closed: {close_status_code} - {close_msg}")
+        if self.running:
+            time.sleep(min(self._reconnect_delay, self._max_reconnect_delay))
+            self._reconnect_delay *= 2
+            self._connect_websocket()
+
+    def _on_open(self, ws):
+        logger.info("WebSocket connection established")
+        self._reconnect_delay = 2
+
+    def _connect_websocket(self):
+        if not self.running:
+            return
+        try:
+            ws_url = f"ws://{self.config.hardware_config.esp32_ip}:{self.config.hardware_config.esp32_port}"
+            self._ws = websocket.WebSocketApp(
+                ws_url,
+                on_message=self._on_message,
+                on_error=self._on_error,
+                on_close=self._on_close,
+                on_open=self._on_open
+            )
+            self._ws_thread = threading.Thread(
+                target=self._ws.run_forever,
+                kwargs={'ping_interval': 30, 'ping_timeout': 10}
+            )
+            self._ws_thread.daemon = True
+            self._ws_thread.start()
+        except Exception as e:
+            logger.error(f"Error establishing WebSocket connection: {e}")
+            self.sensor_updated.emit({'error': True})
 
     def run(self):
-        """Main thread loop with proper error handling"""
-        while self.running:
-            try:
-                # Get sensor data from ESP32
-                data = self._get_sensor_data()
-                
-                if data:
-                    # Update last successful data
-                    self._last_successful_data = data
-                    
-                    # Send to backend
-                    # self._send_to_backend(data)
-                    
-                    # Emit signal with new data
-                    self.sensor_updated.emit(data)
-                else:
-                    # If failed to get new data, use last known good data
-                    if self._last_successful_data:
-                        self.sensor_updated.emit({
-                            **self._last_successful_data,
-                            'stale': True  # Indicate data is not fresh
-                        })
-                    else:
-                        self.sensor_updated.emit({'error': True})
-                        
-            except Exception as e:
-                logger.error(f"Error in sensor thread: {e}")
-                self.sensor_updated.emit({'error': True})
-            
-            # Wait before next update
-            time.sleep(self.config.app_config.update_interval)
-    
-    def _get_sensor_data(self) -> dict:
-        """Get sensor data from ESP32 with proper error handling"""
         try:
-            response = requests.get(
-                f"http://{self.config.hardware_config.esp32_ip}:{self.config.hardware_config.esp32_port}/data",
-                timeout=self.config.api_config.timeout
-            )
-            
-            if response.status_code == 200:
-                return response.json()
-            
-            logger.warning(f"Failed to get sensor data: HTTP {response.status_code}")
-            return None
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"ESP32 connection error: {e}")
-            return None
+            self._connect_websocket()
+            while self.running:
+                time.sleep(1)
+                if not self._ws or not self._ws_thread.is_alive():
+                    logger.warning("WebSocket connection lost, attempting reconnection")
+                    self._connect_websocket()
         except Exception as e:
-            logger.error(f"Unexpected error getting sensor data: {e}")
-            return None
-    
-    def _send_to_backend(self, data: dict) -> None:
-        """Send sensor data to backend"""
-        try:
-            quality_data = {
-                'tds_level': data.get('tds', 0),
-                'ph_level': data.get('ph', 7),
-                'water_level': data.get('water_level', 0)
-            }
-            
-            success = self.api_client.record_quality(quality_data)
-            if not success:
-                logger.warning("Failed to send quality data to backend")
-                
-        except Exception as e:
-            logger.error(f"Error sending data to backend: {e}")
-    
+            logger.error(f"Error in sensor thread main loop: {e}")
+            self.sensor_updated.emit({'error': True})
+
     def cleanup(self):
-        """Clean up thread resources"""
+        logger.info("Cleaning up sensor thread")
         self.stop()
-        # self.wait()
-        if not self.wait(5000):  # 5 second timeout
+        if self._ws:
+            try:
+                self._ws.close()
+            except:
+                pass
+        if not self.wait(5000):
+            logger.warning("Sensor thread cleanup timeout, forcing termination")
             self.terminate()
             self.wait()
     
     def stop(self):
-        """Stop the thread safely"""
+        logger.info("Stopping sensor thread")
         self.running = False
+
+# Class WaterController yang diupdate untuk menggunakan WebSocket
+class WaterController(QObject):
+    update_progress = pyqtSignal(int)
+    filling_complete = pyqtSignal()
+    error_occurred = pyqtSignal(str)
+
+    def __init__(self):
+        super().__init__()
+        self.config = ConfigManager()
+        self.hardware = HardwareController()
+        self.api_client = APIClient()
+        self.pulse_count = 0
+        self.is_running = False
+        self.target_pulses = 0
+        self._lock = threading.Lock()
+        self._ws = None
+        self._setup_websocket()
+
+    def _setup_websocket(self):
+        try:
+            ws_url = f"ws://{self.config.hardware_config.esp32_ip}:{self.config.hardware_config.esp32_port}"
+            self._ws = websocket.WebSocketApp(
+                ws_url,
+                on_message=self._on_ws_message,
+                on_error=self._on_ws_error,
+                on_close=self._on_ws_close
+            )
+            self._ws_thread = threading.Thread(target=self._ws.run_forever)
+            self._ws_thread.daemon = True
+            self._ws_thread.start()
+        except Exception as e:
+            logger.error(f"Failed to setup WebSocket: {e}")
+
+    def _on_ws_message(self, ws, message):
+        try:
+            data = json.loads(message)
+            if 'flowRate' in data:
+                self._update_flow_data(data)
+        except Exception as e:
+            logger.error(f"Error processing WebSocket message: {e}")
+
+    def _update_flow_data(self, data):
+        with self._lock:
+            try:
+                flow_rate = float(data.get('flowRate', 0))
+                if self.is_running and flow_rate > 0:
+                    # Update pulse count based on flow rate
+                    self.pulse_count = int(flow_rate * self.config.hardware_config.pulse_per_liter)
+                    progress = min(100, int((self.pulse_count / self.target_pulses) * 100))
+                    self.update_progress.emit(progress)
+                    
+                    if self.pulse_count >= self.target_pulses:
+                        self.stop_filling()
+            except Exception as e:
+                logger.error(f"Error updating flow data: {e}")
+
+    def _on_ws_error(self, ws, error):
+        logger.error(f"WebSocket error: {error}")
+
+    def _on_ws_close(self, ws, close_status_code, close_msg):
+        logger.warning("WebSocket connection closed")
+        if self.is_running:
+            self._setup_websocket()
+
+    def _control_esp32_relay(self, state: bool) -> bool:
+        try:
+            if self._ws and self._ws.sock and self._ws.sock.connected:
+                command = "toggleRelay"
+                self._ws.send(command)
+                return True
+            else:
+                logger.error("WebSocket not connected")
+                return False
+        except Exception as e:
+            logger.error(f"Error controlling relay via WebSocket: {e}")
+            return False
+
+    def cleanup(self):
+        logger.info("Starting WaterController cleanup")
+        if self.is_running:
+            self.stop_filling()
+        if self._ws:
+            try:
+                self._ws.close()
+            except:
+                pass
+        self.force_shutdown()
+        logger.info("WaterController cleanup completed")
+
+    # ... rest of the WaterController methods remain the same ...
 
 class WaterButton(QPushButton):
     def __init__(self, size_text, price_text, image_path, parent=None):
@@ -1389,6 +1496,10 @@ class MachineWidget(QWidget):
         if not self.is_filling:
             # Disable button during payment process
             self.start_button.setEnabled(False)
+            
+            if DEVELOPMENT_1:
+                self.start_filling_animation()
+                return
             
             # Start payment process
             if hasattr(self.main_window, 'start_payment_process'):

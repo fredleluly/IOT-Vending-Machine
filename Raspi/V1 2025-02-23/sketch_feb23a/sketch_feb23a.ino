@@ -230,7 +230,7 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
       Serial.printf("Client [%u] Connected from %s\n", num, WiFi.softAPIP().toString().c_str());
       sendData();
       break;
-    case WStype_TEXT:
+    case WStype_TEXT: {
       String message = String((char*)payload);
       Serial.printf("Client [%u] Sent: %s\n", num, message.c_str());
       if (message == "toggleRelay") {
@@ -244,6 +244,7 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
         sendData();
       }
       break;
+    }
     case WStype_ERROR:
       Serial.printf("Client [%u] Error!\n", num);
       break;
@@ -282,15 +283,32 @@ void setup() {
   analogSetAttenuation(ADC_11db);
 
   // Mengatur ESP32 sebagai Access Point
-  Serial.println("Mengatur Access Point...");
-  WiFi.mode(WIFI_AP);
-  if (!WiFi.softAP(ssid, password)) {
-    Serial.println("Error: Failed to start Access Point!");
-    while (1) delay(10);
+  // Serial.println("Mengatur Access Point...");
+  // WiFi.mode(WIFI_AP);
+  // if (!WiFi.softAP(ssid, password)) {
+  //   Serial.println("Error: Failed to start Access Point!");
+  //   while (1) delay(10);
+  // }
+  // IPAddress myIP = WiFi.softAPIP();
+  // Serial.print("AP IP Address: ");
+  // Serial.println(myIP);
+  // AS AP
+  // =============================================================================================
+  // OR
+  // =============================================================================================
+  // connect hostpot
+  WiFi.begin(ssid, password);
+
+  Serial.println("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
   }
-  IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP Address: ");
-  Serial.println(myIP);
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 
   // Memulai HTTP Server untuk menyajikan HTML
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
