@@ -5169,3 +5169,436 @@ AttributeError: 'WaterController' object has no attribute 'start_filling'
 2025-02-23 13:38:42,134 - __main__ - WARNING - WebSocket connection lost, attempting reconnection
 2025-02-23 13:38:42,138 - __main__ - INFO - Starting WaterController cleanup
 2025-02-23 13:38:42,148 - __main__ - ERROR - Error during cleanup of MachineWidget: 'WaterController' object has no attribute 'force_shutdown'
+2025-02-23 20:18:31,478 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 20:18:31,686 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 20:18:34,751 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:18:34,753 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:18:34,754 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:18:35,161 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:18:35,163 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:18:35,163 - __main__ - ERROR - Filling error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:18:35,164 - __main__ - INFO - WebSocket connection closed
+2025-02-23 20:18:39,869 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:18:39,870 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:18:39,871 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:18:46,934 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:18:46,935 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:18:46,937 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:18:55,099 - __main__ - ERROR - WebSocket error: [WinError 10051] A socket operation was attempted to an unreachable network
+2025-02-23 20:18:55,161 - websocket - ERROR - [WinError 10051] A socket operation was attempted to an unreachable network - goodbye
+2025-02-23 20:18:55,239 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:19:13,025 - websocket - INFO - Websocket connected
+2025-02-23 20:19:13,026 - __main__ - INFO - WebSocket connection established
+2025-02-23 20:19:23,427 - __main__ - INFO - Starting filling process for 100 ml with target 108 pulses
+2025-02-23 20:22:59,631 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 20:22:59,710 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 20:23:01,300 - websocket - INFO - Websocket connected
+2025-02-23 20:23:01,302 - __main__ - INFO - WebSocket connection established
+2025-02-23 20:23:01,758 - websocket - INFO - Websocket connected
+2025-02-23 20:23:06,821 - __main__ - INFO - Starting filling process for 100 ml with target 108 pulses
+2025-02-23 20:28:31,078 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 20:28:31,172 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 20:28:33,182 - websocket - INFO - Websocket connected
+2025-02-23 20:28:33,185 - websocket - INFO - Websocket connected
+2025-02-23 20:28:33,218 - __main__ - INFO - WebSocket connection established
+2025-02-23 20:28:35,740 - __main__ - INFO - Starting filling process for 100 ml with target 108 pulses
+2025-02-23 20:30:20,630 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:30:20,630 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:30:20,662 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:30:20,666 - __main__ - ERROR - Filling error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:30:20,711 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:30:20,783 - __main__ - INFO - WebSocket connection closed
+2025-02-23 20:30:21,070 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:30:26,294 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:30:26,296 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:30:26,300 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:30:36,835 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:30:36,837 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:30:36,838 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:30:47,892 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:30:47,893 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:30:47,894 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:31:06,909 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:31:06,910 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:31:06,911 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:31:40,018 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:31:40,018 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:31:40,019 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:32:13,095 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:32:13,107 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:32:13,108 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:32:46,173 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:32:46,174 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:32:46,175 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:33:19,293 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:33:19,294 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:33:19,295 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:33:52,430 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:33:52,431 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:33:52,432 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:34:25,507 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:34:25,537 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:34:25,541 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:34:58,585 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:34:58,586 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:34:58,586 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:35:31,662 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:35:31,663 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:35:31,664 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:36:04,684 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:36:04,691 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:36:04,708 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:36:37,817 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:36:37,824 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:36:37,833 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:37:10,878 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:37:10,880 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:37:10,881 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:37:43,972 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:37:43,974 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:37:43,974 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:38:17,050 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:38:17,051 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:38:17,051 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:38:50,066 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:38:50,077 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:38:50,078 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:39:23,159 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:39:23,160 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:39:23,161 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:39:56,182 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:39:56,198 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:39:56,201 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:40:29,219 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:40:29,220 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:40:29,227 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:41:02,261 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:41:02,326 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:41:02,469 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:41:35,617 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:41:35,619 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:41:35,620 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:42:08,649 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:42:08,652 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:42:08,655 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:42:41,771 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:42:41,782 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:42:41,793 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:43:14,952 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:43:14,959 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:43:14,967 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:43:48,031 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:43:48,032 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:43:48,033 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:44:21,057 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:44:21,083 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:44:21,120 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:44:54,168 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:44:54,169 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:44:54,170 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:45:27,186 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:45:27,187 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:45:27,188 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:46:00,204 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:46:00,218 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:46:00,219 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:46:33,610 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:46:33,622 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:46:33,835 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:47:06,903 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:47:06,904 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:47:06,904 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:47:39,980 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:47:40,002 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:47:40,015 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:48:13,057 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:48:13,058 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:48:13,059 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:48:46,138 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:48:46,141 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:48:46,142 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:49:19,159 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:49:19,161 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:49:19,162 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:49:52,298 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:49:52,299 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:49:52,302 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:50:25,362 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:50:25,364 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:50:25,365 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:51:17,333 - __main__ - ERROR - WebSocket error: Connection timed out
+2025-02-23 20:51:17,334 - websocket - ERROR - Connection timed out - goodbye
+2025-02-23 20:51:17,335 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:51:50,467 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:51:50,469 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:51:50,470 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:52:23,542 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:52:23,549 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:52:23,550 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:52:56,617 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:52:56,617 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:52:56,618 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:53:29,693 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:53:29,694 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:53:29,695 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:54:02,711 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:54:02,712 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:54:02,712 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:54:35,758 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:54:35,759 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:54:35,759 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:55:08,803 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:55:08,805 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:55:08,805 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:55:41,908 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:55:41,912 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:55:41,914 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:56:14,975 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:56:15,013 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:56:15,087 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:56:48,265 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:56:48,271 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:56:48,272 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:57:21,436 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:57:21,437 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:57:21,439 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:57:54,464 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:57:54,470 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:57:54,482 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:58:27,599 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:58:27,600 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:58:27,601 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:59:00,666 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:59:00,667 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:59:00,669 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 20:59:33,745 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 20:59:33,755 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 20:59:33,756 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:00:06,830 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:00:06,863 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:00:06,867 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:00:57,101 - __main__ - ERROR - WebSocket error: Connection timed out
+2025-02-23 21:00:57,119 - websocket - ERROR - Connection timed out - goodbye
+2025-02-23 21:00:57,119 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:01:30,183 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:01:30,184 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:01:30,184 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:02:07,818 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:02:07,819 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:02:07,820 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:02:40,843 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:02:40,843 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:02:40,844 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:03:13,914 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:03:13,919 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:03:13,926 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:03:26,609 - __main__ - INFO - Application shutdown initiated
+2025-02-23 21:03:26,628 - __main__ - INFO - Cleaning up sensor thread
+2025-02-23 21:03:26,655 - __main__ - INFO - Stopping sensor thread
+2025-02-23 21:03:27,124 - __main__ - INFO - Starting WaterController cleanup
+2025-02-23 21:03:30,203 - __main__ - INFO - Filling completed. Pulses: 0/108
+2025-02-23 21:03:30,204 - __main__ - INFO - Forcing immediate hardware shutdown
+2025-02-23 21:03:30,204 - __main__ - INFO - Hardware shutdown completed
+2025-02-23 21:03:30,204 - __main__ - INFO - WaterController cleanup completed
+2025-02-23 21:03:30,217 - __main__ - INFO - Forcing immediate hardware shutdown
+2025-02-23 21:03:30,217 - __main__ - INFO - Hardware shutdown completed
+2025-02-23 21:03:39,394 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 21:03:39,491 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 21:03:39,813 - __main__ - INFO - Running in simulation mode - GPIO setup skipped
+2025-02-23 21:03:39,814 - __main__ - INFO - HardwareController initialized in simulation mode
+2025-02-23 21:03:41,208 - websocket - INFO - Websocket connected
+2025-02-23 21:03:41,209 - websocket - INFO - Websocket connected
+2025-02-23 21:03:41,256 - __main__ - INFO - WebSocket connection established
+2025-02-23 21:03:46,376 - __main__ - INFO - Starting filling process for 100 ml with target 108 pulses
+2025-02-23 21:03:58,034 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:03:58,036 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:03:58,093 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:03:58,093 - __main__ - ERROR - Filling error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:03:58,094 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:03:58,173 - __main__ - INFO - WebSocket connection closed
+2025-02-23 21:03:58,273 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:00,284 - __main__ - WARNING - WebSocket connection lost, attempting reconnection
+2025-02-23 21:04:00,286 - __main__ - ERROR - WebSocket error: [WinError 10051] A socket operation was attempted to an unreachable network
+2025-02-23 21:04:00,288 - websocket - ERROR - [WinError 10051] A socket operation was attempted to an unreachable network - goodbye
+2025-02-23 21:04:00,288 - __main__ - ERROR - WebSocket error: [WinError 10051] A socket operation was attempted to an unreachable network
+2025-02-23 21:04:00,289 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:00,290 - websocket - ERROR - [WinError 10051] A socket operation was attempted to an unreachable network - goodbye
+2025-02-23 21:04:00,294 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:04,364 - __main__ - WARNING - WebSocket connection lost, attempting reconnection
+2025-02-23 21:04:07,439 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:04:07,508 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:04:07,524 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:04:07,531 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:04:07,633 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:07,781 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:04:07,877 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:04:08,010 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:08,032 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:27,044 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:04:27,049 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:04:27,066 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:27,101 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:04:27,103 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:04:27,106 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:04:27,107 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:04:27,109 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:27,110 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:04:46,392 - __main__ - INFO - Starting filling process for 1 Liter with target 1080 pulses
+2025-02-23 21:05:00,119 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:05:00,143 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:05:00,143 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:05:00,143 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:05:00,144 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:05:00,146 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:05:00,147 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:05:00,149 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:05:00,150 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:05:33,194 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:05:33,195 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:05:33,195 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:05:33,200 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:05:33,201 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:05:33,202 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:05:33,203 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:05:33,204 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:05:33,204 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:06:06,226 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:06:06,226 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:06:06,228 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:06:06,230 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:06:06,232 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:06:06,232 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:06:06,233 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:06:06,234 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:06:06,234 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:06:39,349 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:06:39,350 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:06:39,351 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:06:39,352 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:06:39,354 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:06:39,355 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:06:39,356 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:06:39,358 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:06:39,362 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:07:12,430 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:07:12,431 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:07:12,431 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:07:12,432 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:07:12,433 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:07:12,435 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:07:12,436 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:07:12,437 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:07:12,438 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:07:45,503 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:07:45,504 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:07:45,504 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:07:45,515 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:07:45,518 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:07:45,536 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:07:45,567 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:07:45,571 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:07:45,583 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:08:18,680 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:08:18,681 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:08:18,681 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:08:18,682 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:08:18,682 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:08:18,683 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:08:18,683 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:08:18,684 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:08:18,684 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:08:51,758 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:08:51,758 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:08:51,759 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:08:51,760 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:08:51,763 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:08:51,764 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:08:51,765 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:08:51,766 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:08:51,767 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:09:24,840 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:09:24,842 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:09:24,842 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:09:24,881 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:09:24,923 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:09:24,926 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:09:24,928 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:09:24,929 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:09:24,931 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:10:37,300 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 21:10:37,384 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 21:10:37,671 - __main__ - INFO - Running in simulation mode - GPIO setup skipped
+2025-02-23 21:10:37,672 - __main__ - INFO - HardwareController initialized in simulation mode
+2025-02-23 21:11:15,478 - __main__ - ERROR - WebSocket error: [WinError 10053] An established connection was aborted by the software in your host machine
+2025-02-23 21:11:15,478 - __main__ - ERROR - WebSocket error: [WinError 10053] An established connection was aborted by the software in your host machine
+2025-02-23 21:11:15,506 - websocket - ERROR - [WinError 10053] An established connection was aborted by the software in your host machine - goodbye
+2025-02-23 21:11:15,514 - websocket - ERROR - [WinError 10053] An established connection was aborted by the software in your host machine - goodbye
+2025-02-23 21:11:15,514 - __main__ - ERROR - Filling error: [WinError 10053] An established connection was aborted by the software in your host machine
+2025-02-23 21:11:15,521 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:11:15,522 - __main__ - INFO - WebSocket connection closed
+2025-02-23 21:11:20,610 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:11:20,611 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:11:20,612 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:11:27,630 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:11:27,633 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:11:27,635 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:11:36,050 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 21:11:36,139 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 21:11:36,438 - __main__ - INFO - Running in simulation mode - GPIO setup skipped
+2025-02-23 21:11:36,439 - __main__ - INFO - HardwareController initialized in simulation mode
+2025-02-23 21:11:39,188 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:11:39,190 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:11:39,192 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:11:39,495 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:11:39,497 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:11:39,498 - __main__ - ERROR - Filling error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:11:39,499 - __main__ - INFO - WebSocket connection closed
+2025-02-23 21:11:44,336 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:11:44,356 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:11:44,360 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:11:51,379 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:11:51,398 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:11:51,419 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:12:02,576 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:12:02,577 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:12:02,578 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:12:21,711 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 21:12:21,815 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 21:12:22,111 - __main__ - INFO - Running in simulation mode - GPIO setup skipped
+2025-02-23 21:12:22,112 - __main__ - INFO - HardwareController initialized in simulation mode
+2025-02-23 21:12:23,283 - websocket - INFO - Websocket connected
+2025-02-23 21:12:23,284 - websocket - INFO - Websocket connected
+2025-02-23 21:12:23,324 - __main__ - INFO - WebSocket connection established
+2025-02-23 21:12:38,770 - __main__ - INFO - Starting filling process for 1 Liter with target 1080 pulses
+2025-02-23 21:12:38,778 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:12:38,778 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:12:38,896 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:12:38,896 - __main__ - ERROR - Filling error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:12:38,897 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:12:38,941 - __main__ - INFO - WebSocket connection closed
+2025-02-23 21:12:38,986 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:12:41,019 - __main__ - ERROR - WebSocket error: [WinError 10051] A socket operation was attempted to an unreachable network
+2025-02-23 21:12:41,020 - websocket - ERROR - [WinError 10051] A socket operation was attempted to an unreachable network - goodbye
+2025-02-23 21:12:41,021 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:12:42,838 - __main__ - INFO - Starting filling process for 1 Liter with target 1080 pulses
+2025-02-23 21:12:48,195 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:12:48,263 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:12:48,305 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:12:56,587 - __main__ - WARNING - WebSocket connection lost, attempting reconnection
+2025-02-23 21:13:01,098 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:13:01,098 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:13:01,100 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:13:01,101 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:13:01,103 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:13:01,105 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:13:21,279 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:13:21,280 - __main__ - ERROR - WebSocket error: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-02-23 21:13:21,296 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:13:21,304 - websocket - ERROR - [WinError 10054] An existing connection was forcibly closed by the remote host - goodbye
+2025-02-23 21:13:21,307 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:13:21,327 - __main__ - WARNING - WebSocket connection closed: None - None
+2025-02-23 21:13:59,261 - __main__ - WARNING - RPi.GPIO not available - running in simulation mode
+2025-02-23 21:13:59,361 - __main__ - INFO - Configuration loaded successfully
+2025-02-23 21:13:59,761 - __main__ - INFO - Running in simulation mode - GPIO setup skipped
+2025-02-23 21:13:59,761 - __main__ - INFO - HardwareController initialized in simulation mode
+2025-02-23 21:14:31,872 - __main__ - INFO - Starting filling process for 100 ml with target 108 pulses

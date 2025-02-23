@@ -8,9 +8,9 @@
     },
     "hardware": {
         "flow_sensor_pin": 20,
-        "motor_pin": 21,
+        "motor_pin": 20,
         "esp32_ip": "192.168.4.1",
-        "esp32_port": 81,
+        "esp32_port": 80,
         "ir_sensor_pin": 24,
         "pulse_per_liter": 500
     },

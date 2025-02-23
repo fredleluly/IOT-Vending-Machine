@@ -1,25 +1,21 @@
 #include <WiFi.h>
-#include <WebSocketsServer.h>
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
 #include <ESPAsyncWebServer.h>
+#include <ArduinoJson.h>
 
 // WiFi Credentials untuk Access Point
 const char* ssid = "haisayakaka";
 const char* password = "12345678";
 
-// WebSocket Server pada port 81
-WebSocketsServer webSocket = WebSocketsServer(81);
-
 // HTTP Server pada port 80
 AsyncWebServer server(80);
 
 // ADS1115 untuk sensor TDS
-Adafruit_ADS1115 ads;
+Adafruit_ADS1X15 ads;
 
 // Pin Configuration
 const int PH_PIN = 36;         // GPIO36 untuk pH
-const int RELAY_PIN = 13;      // GPIO13 untuk relay pompa
 const int SENSOR = 34;         // GPIO34 untuk water flow sensor
 
 // Sampling Configuration
@@ -40,10 +36,13 @@ float temperature = 25;
 
 // Water Flow Configuration
 volatile byte pulseCount;
-float calibrationFactor = 8;
+float calibrationFactor = 450;  // Nilai sementara, akan kita kalibrasi
 float flowRate = 0.0;
 float totalLitres = 0.0;
 unsigned long lastFlowTime = 0;
+unsigned long checkInterval = 100;  // Cek setiap 100 ms
+float targetVolumeMl = 0.0;
+bool isFillingActive = false;
 
 // Variables for readings
 float avgVoltagePH = 0.0;
@@ -51,9 +50,8 @@ float phValue = 0.0;
 String phStatus = "";
 float tdsValue = 0.0;
 float tdsVoltage = 0.0;
-bool relayStatus = false;
 
-// HTML dan JavaScript untuk klien (tetap sama seperti sebelumnya)
+// HTML dan JavaScript untuk klien (tetap sama)
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
 <html>
@@ -70,21 +68,36 @@ const char index_html[] PROGMEM = R"rawliteral(
   </style>
 </head>
 <body>
-  <div class="card"><h2>pH Sensor Monitor</h2><div class="reading">pH: <span id="ph">0.00</span></div><div class="status">Status: <span id="status">Waiting...</span></div><div class="status">Voltage: <span id="voltage">0.000</span> V</div></div>
-  <div class="card"><h2>TDS Sensor Monitor</h2><div class="reading">TDS: <span id="tds">0</span> ppm</div><div class="status">Voltage: <span id="tdsVoltage">0.000</span> V</div></div>
-  <div class="card"><h2>Water Flow Monitor</h2><div class="reading">Flow Rate: <span id="flowrate">0.00</span> L/min</div><div class="reading">Total: <span id="totallitres">0.00</span> L</div><button class="button" onclick="sendResetFlow()">Reset Water Flow</button></div>
-  <div class="card"><h2>Kontrol Pompa Air</h2><button class="button" id="relayButton" onclick="sendToggleRelay()">NYALAKAN POMPA</button></div>
+  <div class="card">
+    <h2>pH Sensor Monitor</h2>
+    <div class="reading">pH: <span id="ph">0.00</span></div>
+    <div class="status">Status: <span id="status">Waiting...</span></div>
+    <div class="status">Voltage: <span id="voltage">0.000</span> V</div>
+  </div>
+  
+  <div class="card">
+    <h2>TDS Sensor Monitor</h2>
+    <div class="reading">TDS: <span id="tds">0</span> ppm</div>
+    <div class="status">Voltage: <span id="tdsVoltage">0.000</span> V</div>
+  </div>
+  
+  <div class="card">
+    <h2>Water Flow Monitor</h2>
+    <div class="reading">Flow Rate: <span id="flowrate">0.00</span> L/min</div>
+    <div class="reading">Total: <span id="totallitres">0.00</span> L</div>
+    <button class="button" onclick="resetFlow()">Reset Water Flow</button>
+    <button class="button button-off" onclick="emergencyStop()">EMERGENCY STOP</button>
+  </div>
+  
+  </div>
+
+  
+  
   <script>
-    var websocket;
-    var gateway = `ws://${window.location.hostname}:81/`;
-    function initWebSocket() {
-      websocket = new WebSocket(gateway);
-      websocket.onopen = function() { console.log("WebSocket Connected"); };
-      websocket.onclose = function() { console.log("WebSocket Disconnected"); setTimeout(initWebSocket, 2000); };
-      websocket.onerror = function(error) { console.error("WebSocket Error: ", error); };
-      websocket.onmessage = function(event) {
-        try {
-          var data = JSON.parse(event.data);
+    function updateData() {
+      fetch('/data')
+        .then(response => response.json())
+        .then(data => {
           document.getElementById("ph").innerHTML = data.ph;
           document.getElementById("status").innerHTML = data.phStatus;
           document.getElementById("voltage").innerHTML = data.phVoltage;
@@ -92,18 +105,30 @@ const char index_html[] PROGMEM = R"rawliteral(
           document.getElementById("tdsVoltage").innerHTML = data.tdsVoltage;
           document.getElementById("flowrate").innerHTML = data.flowRate;
           document.getElementById("totallitres").innerHTML = data.totalLitres;
-          updateRelayButton(data.relay === "ON");
-        } catch (e) { console.error("Error parsing message: ", e); }
-      };
+        });
     }
-    function sendToggleRelay() { websocket.send("toggleRelay"); }
-    function sendResetFlow() { websocket.send("resetFlow"); }
-    function updateRelayButton(isOn) {
-      var button = document.getElementById("relayButton");
-      if(isOn) { button.innerHTML = "MATIKAN POMPA"; button.classList.add("button-off"); }
-      else { button.innerHTML = "NYALAKAN POMPA"; button.classList.remove("button-off"); }
+
+    function resetFlow() {
+      fetch('/resetFlow', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          if(data.status === "ok") {
+            updateData();
+          }
+        });
     }
-    window.onload = initWebSocket;
+    function emergencyStop() {
+      fetch('/emergencyStop', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          if(data.status === "ok") {
+            updateData();
+          }
+        });
+    }
+
+    setInterval(updateData, 2000);
+    updateData();
   </script>
 </body>
 </html>
@@ -111,280 +136,271 @@ const char index_html[] PROGMEM = R"rawliteral(
 
 // Water Flow Interrupt Handler
 void IRAM_ATTR pulseCounter() {
-  pulseCount++;
+    pulseCount++;
 }
 
-// TDS Functions
+// TDS Functions (tetap sama)
 int getMedianNum(int16_t bArray[], int iFilterLen) {
-  int16_t bTab[iFilterLen];
-  for (byte i = 0; i < iFilterLen; i++) bTab[i] = bArray[i];
-  for (int j = 0; j < iFilterLen - 1; j++) {
-    for (int i = 0; i < iFilterLen - j - 1; i++) {
-      if (bTab[i] > bTab[i + 1]) {
-        int16_t bTemp = bTab[i];
-        bTab[i] = bTab[i + 1];
-        bTab[i + 1] = bTemp;
-      }
+    int16_t bTab[iFilterLen];
+    for (byte i = 0; i < iFilterLen; i++) bTab[i] = bArray[i];
+    for (int j = 0; j < iFilterLen - 1; j++) {
+        for (int i = 0; i < iFilterLen - j - 1; i++) {
+            if (bTab[i] > bTab[i + 1]) {
+                int16_t bTemp = bTab[i];
+                bTab[i] = bTab[i + 1];
+                bTab[i + 1] = bTemp;
+            }
+        }
     }
-  }
-  return (iFilterLen & 1) ? bTab[(iFilterLen - 1) / 2] : (bTab[iFilterLen / 2] + bTab[iFilterLen / 2 - 1]) / 2;
+    return (iFilterLen & 1) ? bTab[(iFilterLen - 1) / 2] : (bTab[iFilterLen / 2] + bTab[iFilterLen / 2 - 1]) / 2;
 }
 
 void readTDS() {
-  static unsigned long analogSampleTimepoint = millis();
-  if (millis() - analogSampleTimepoint > 40U) {
-    analogSampleTimepoint = millis();
-    int16_t reading = ads.readADC_SingleEnded(0);
-    if (reading < 0) {
-      Serial.println("Error: TDS reading failed from ADS1115");
-      tdsValue = -1;
-      return;
+    static unsigned long analogSampleTimepoint = millis();
+    if (millis() - analogSampleTimepoint > 40U) {
+        analogSampleTimepoint = millis();
+        int16_t reading = ads.readADC_SingleEnded(0);
+        if (reading < 0) {
+            Serial.println("Error: TDS reading failed from ADS1115");
+            tdsValue = -1;
+            return;
+        }
+        analogBuffer[analogBufferIndex] = reading;
+        analogBufferIndex = (analogBufferIndex + 1) % SCOUNT;
     }
-    analogBuffer[analogBufferIndex] = reading;
-    analogBufferIndex = (analogBufferIndex + 1) % SCOUNT;
-  }
 
-  static unsigned long printTimepoint = millis();
-  if (millis() - printTimepoint > 800U) {
-    printTimepoint = millis();
-    memcpy(analogBufferTemp, analogBuffer, sizeof(analogBuffer));
-    int medianValue = getMedianNum(analogBufferTemp, SCOUNT);
-    tdsVoltage = ads.computeVolts(medianValue);
-    if (tdsVoltage < 0) {
-      Serial.println("Error: Invalid TDS voltage");
-      tdsValue = -1;
-    } else {
-      float compensationCoefficient = 1.0 + 0.02 * (temperature - 25.0);
-      float compensationVoltage = tdsVoltage / compensationCoefficient;
-      tdsValue = (133.42 * pow(compensationVoltage, 3) - 255.86 * pow(compensationVoltage, 2) + 857.39 * compensationVoltage) * 0.5;
+    static unsigned long printTimepoint = millis();
+    if (millis() - printTimepoint > 800U) {
+        printTimepoint = millis();
+        memcpy(analogBufferTemp, analogBuffer, sizeof(analogBuffer));
+        int medianValue = getMedianNum(analogBufferTemp, SCOUNT);
+        tdsVoltage = ads.computeVolts(medianValue);
+        if (tdsVoltage < 0) {
+            Serial.println("Error: Invalid TDS voltage");
+            tdsValue = -1;
+        } else {
+            float compensationCoefficient = 1.0 + 0.02 * (temperature - 25.0);
+            float compensationVoltage = tdsVoltage / compensationCoefficient;
+            tdsValue = (133.42 * pow(compensationVoltage, 3) - 255.86 * pow(compensationVoltage, 2) + 857.39 * compensationVoltage) * 0.5;
+        }
     }
-  }
 }
 
-// pH Functions
+// pH Functions (tetap sama)
 float readPHVoltage() {
-  float voltage = 0.0;
-  int samples[SAMPLES];
-  for (int i = 0; i < SAMPLES; i++) {
-    samples[i] = analogRead(PH_PIN);
-    if (samples[i] < 0) {
-      Serial.println("Error: Failed to read pH sensor");
-      return -1;
+    float voltage = 0.0;
+    int samples[SAMPLES];
+    for (int i = 0; i < SAMPLES; i++) {
+        samples[i] = analogRead(PH_PIN);
+        if (samples[i] < 0) {
+            Serial.println("Error: Failed to read pH sensor");
+            return -1;
+        }
+        delay(10);
     }
-    delay(10);
-  }
-  // Sort samples untuk median
-  for (int i = 0; i < SAMPLES - 1; i++) {
-    for (int j = i + 1; j < SAMPLES; j++) {
-      if (samples[i] > samples[j]) {
-        int temp = samples[i];
-        samples[i] = samples[j];
-        samples[j] = temp;
-      }
+    
+    for (int i = 0; i < SAMPLES - 1; i++) {
+        for (int j = i + 1; j < SAMPLES; j++) {
+            if (samples[i] > samples[j]) {
+                int temp = samples[i];
+                samples[i] = samples[j];
+                samples[j] = temp;
+            }
+        }
     }
-  }
-  int validSamples = SAMPLES - 4;
-  float avgValue = 0;
-  for (int i = 2; i < SAMPLES - 2; i++) {
-    avgValue += samples[i];
-  }
-  voltage = (avgValue / validSamples) * (VOLTAGE_REF / 4095.0);
-  return voltage;
+    int validSamples = SAMPLES - 4;
+    float avgValue = 0;
+    for (int i = 2; i < SAMPLES - 2; i++) {
+        avgValue += samples[i];
+    }
+    voltage = (avgValue / validSamples) * (VOLTAGE_REF / 4095.0);
+    return voltage;
 }
 
 float voltageToPH(float voltage) {
-  if (voltage < 0) {
-    Serial.println("Error: Invalid pH voltage");
-    return -1;
-  }
-  return 7.0 + ((PH7_VOLTAGE - voltage) / VOLTAGE_PER_PH);
-}
-
-// Fungsi untuk mengirim data ke semua klien WebSocket
-void sendData() {
-  if (webSocket.connectedClients() == 0) {
-    Serial.println("No clients connected to WebSocket");
-    return;
-  }
-  String json = "{";
-  json += "\"ph\":\"" + String(phValue, 2) + "\",";
-  json += "\"phStatus\":\"" + phStatus + "\",";
-  json += "\"phVoltage\":\"" + String(avgVoltagePH, 3) + "\",";
-  json += "\"tds\":\"" + String(tdsValue, 0) + "\",";
-  json += "\"tdsVoltage\":\"" + String(tdsVoltage, 3) + "\",";
-  json += "\"flowRate\":\"" + String(flowRate, 2) + "\",";
-  json += "\"totalLitres\":\"" + String(totalLitres, 2) + "\",";
-  json += "\"relay\":\"" + String(relayStatus ? "ON" : "OFF") + "\"";
-  json += "}";
-  webSocket.broadcastTXT(json);
-  Serial.println("Data sent: " + json);
-}
-
-// Callback untuk event WebSocket
-void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-  switch (type) {
-    case WStype_DISCONNECTED:
-      Serial.printf("Client [%u] Disconnected!\n", num);
-      break;
-    case WStype_CONNECTED:
-      Serial.printf("Client [%u] Connected from %s\n", num, WiFi.softAPIP().toString().c_str());
-      sendData();
-      break;
-    case WStype_TEXT: {
-      String message = String((char*)payload);
-      Serial.printf("Client [%u] Sent: %s\n", num, message.c_str());
-      if (message == "toggleRelay") {
-        relayStatus = !relayStatus;
-        digitalWrite(RELAY_PIN, relayStatus);
-        Serial.println("Relay status: " + String(relayStatus ? "ON" : "OFF"));
-        sendData();
-      } else if (message == "resetFlow") {
-        totalLitres = 0;
-        Serial.println("Water flow reset");
-        sendData();
-      }
-      break;
+    if (voltage < 0) {
+        Serial.println("Error: Invalid pH voltage");
+        return -1;
     }
-    case WStype_ERROR:
-      Serial.printf("Client [%u] Error!\n", num);
-      break;
-  }
+    return 7.0 + ((PH7_VOLTAGE - voltage) / VOLTAGE_PER_PH);
 }
 
-void setup() {
-  Serial.begin(115200);
-  delay(1000); // Stabilisasi
-
-  // Inisialisasi pin
-  pinMode(RELAY_PIN, OUTPUT);
-  pinMode(SENSOR, INPUT_PULLUP);
-  digitalWrite(RELAY_PIN, LOW);
-
-  // Inisialisasi Water Flow
-  pulseCount = 0;
-  flowRate = 0.0;
-  totalLitres = 0.0;
-  lastFlowTime = 0;
-  if (digitalPinToInterrupt(SENSOR) == NOT_AN_INTERRUPT) {
-    Serial.println("Error: Water flow sensor pin does not support interrupts");
-  } else {
-    attachInterrupt(digitalPinToInterrupt(SENSOR), pulseCounter, FALLING);
-  }
-
-  // Inisialisasi I2C untuk ADS1115
-  Wire.begin(21, 22);
-  if (!ads.begin()) {
-    Serial.println("Error: Failed to initialize ADS1115!");
-    while (1) delay(10);
-  }
-  ads.setGain(GAIN_ONE);
-
-  analogSetWidth(12);
-  analogSetAttenuation(ADC_11db);
-
-  // Mengatur ESP32 sebagai Access Point
-  // Serial.println("Mengatur Access Point...");
-  // WiFi.mode(WIFI_AP);
-  // if (!WiFi.softAP(ssid, password)) {
-  //   Serial.println("Error: Failed to start Access Point!");
-  //   while (1) delay(10);
-  // }
-  // IPAddress myIP = WiFi.softAPIP();
-  // Serial.print("AP IP Address: ");
-  // Serial.println(myIP);
-  // AS AP
-  // =============================================================================================
-  // OR
-  // =============================================================================================
-  // connect hostpot
-  WiFi.begin(ssid, password);
-
-  Serial.println("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  // Memulai HTTP Server untuk menyajikan HTML
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html);
-  });
-  server.begin();
-  Serial.println("HTTP server aktif");
-
-  // Memulai WebSocket server
-  webSocket.begin();
-  webSocket.onEvent(onWebSocketEvent);
-  Serial.println("WebSocket server aktif");
-  Serial.print("Hubungkan ke WiFi: ");
-  Serial.println(ssid);
-  Serial.print("Kemudian akses: http://");
-  Serial.println(myIP);
-
-  delay(2000);
-}
-
-void loop() {
-  webSocket.loop();  // Tangani koneksi WebSocket
-
-  // Kirim heartbeat setiap 10 detik
-  static unsigned long lastHeartbeat = 0;
-  if (millis() - lastHeartbeat > 10000) {
-    if (webSocket.connectedClients() > 0) {
-      webSocket.broadcastTXT("{\"type\":\"heartbeat\"}");
-      Serial.println("Heartbeat sent");
-    }
-    lastHeartbeat = millis();
-  }
-
-  // Read pH
-  avgVoltagePH = readPHVoltage();
-  if (avgVoltagePH >= 0) {
-    phValue = voltageToPH(avgVoltagePH);
-    if (phValue < 0 || phValue > 14) {
-      phStatus = "Error: Pembacaan tidak valid";
-    } else if (phValue < 6.5) {
-      phStatus = "Asam";
-    } else if (phValue > 7.5) {
-      phStatus = "Basa";
-    } else {
-      phStatus = "Netral";
-    }
-  } else {
-    phValue = -1;
-    phStatus = "Error: Sensor pH gagal";
-  }
-
-  // Read TDS
-  readTDS();
-
-  // Calculate Water Flow
-  if (millis() - lastFlowTime > 1000) {
+// Fungsi Water Flow yang sudah diperbaiki
+void handleWaterFlow() {
     detachInterrupt(digitalPinToInterrupt(SENSOR));
-    flowRate = ((1000.0 / (millis() - lastFlowTime)) * pulseCount) / calibrationFactor;
+    
+    unsigned long elapsedTime = millis() - lastFlowTime;
+    if (elapsedTime == 0) elapsedTime = 1; // Hindari pembagian dengan nol
+    
+    flowRate = ((1000.0 / elapsedTime) * pulseCount) / calibrationFactor;
+    
     if (flowRate >= 0) {
-      float flowLitres = (flowRate / 60);
-      totalLitres += flowLitres;
+        float flowLitres = (flowRate * (elapsedTime / 1000.0)) / 60.0;
+        totalLitres += flowLitres;
+        
+        Serial.printf("Pulsa: %d, Waktu: %lu ms, Laju: %.2f L/min, Volume: %.4f L, Total: %.2f L\n",
+                      pulseCount, elapsedTime, flowRate, flowLitres, totalLitres);
+        
+        if (isFillingActive) {
+            float currentVolumeMl = totalLitres * 1000;
+            if (currentVolumeMl >= targetVolumeMl) {
+                Serial.printf("Target tercapai: %.2f ml dari %.2f ml\n", currentVolumeMl, targetVolumeMl);
+                isFillingActive = false;
+                checkInterval = 1000;
+            }
+        }
     } else {
-      Serial.println("Error: Invalid flow rate calculation");
-      flowRate = 0;
+        Serial.println("Error: Perhitungan laju aliran salah");
+        flowRate = 0;
     }
+    
     pulseCount = 0;
     lastFlowTime = millis();
     attachInterrupt(digitalPinToInterrupt(SENSOR), pulseCounter, FALLING);
-  }
+}
 
-  // Kirim data ke semua klien setiap 2 detik
-  static unsigned long lastUpdate = 0;
-  if (millis() - lastUpdate > 2000) {
-    sendData();
-    lastUpdate = millis();
-  }
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
 
-  delay(100);  // Hindari CPU overload
+    // Initialize Water Flow Sensor
+    pinMode(SENSOR, INPUT_PULLUP);
+    pulseCount = 0;
+    flowRate = 0.0;
+    totalLitres = 0.0;
+    lastFlowTime = 0;
+    
+    if (digitalPinToInterrupt(SENSOR) == NOT_AN_INTERRUPT) {
+        Serial.println("Error: Water flow sensor pin does not support interrupts");
+    } else {
+        attachInterrupt(digitalPinToInterrupt(SENSOR), pulseCounter, FALLING);
+        Serial.println("Water flow sensor initialized");
+    }
+
+    // Initialize I2C for ADS1115
+    Wire.begin(21, 22);
+    if (!ads.begin()) {
+        Serial.println("Error: Failed to initialize ADS1115!");
+        while (1) delay(10);
+    }
+    ads.setGain(GAIN_ONE);
+    Serial.println("ADS1115 initialized");
+
+    // Setup ADC
+    analogSetWidth(12);
+    analogSetAttenuation(ADC_11db);
+
+    // Setup WiFi AP
+    WiFi.mode(WIFI_AP);
+    if (!WiFi.softAP(ssid, password)) {
+        Serial.println("Error: Failed to start Access Point!");
+        while (1) delay(10);
+    }
+    IPAddress myIP = WiFi.softAPIP();
+    Serial.print("AP IP address: ");
+    Serial.println(myIP);
+
+    // HTTP Routes (tetap sama)
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send_P(200, "text/html", index_html);
+    });
+
+    server.on("/setCalibration", HTTP_POST, [](AsyncWebServerRequest *request) {
+    if (request->hasParam("factor", true)) {
+        String factorStr = request->getParam("factor", true)->value();
+        calibrationFactor = factorStr.toFloat();
+        String response = "{\"status\":\"ok\",\"calibrationFactor\":\"" + String(calibrationFactor) + "\"}";
+        request->send(200, "application/json", response);
+        Serial.printf("Calibration factor set to: %.2f\n", calibrationFactor);
+    } else {
+        request->send(400, "text/plain", "Factor parameter required");
+    }
+    });
+
+    server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
+        StaticJsonDocument<512> doc;
+        doc["ph"] = String(phValue, 2);
+        doc["phStatus"] = phStatus;
+        doc["phVoltage"] = String(avgVoltagePH, 3);
+        doc["tds"] = String(tdsValue, 0);
+        doc["tdsVoltage"] = String(tdsVoltage, 3);
+        doc["flowRate"] = String(flowRate, 2);
+        doc["totalLitres"] = String(totalLitres, 2);
+        doc["isActive"] = isFillingActive;
+        doc["completed"] = !isFillingActive && (totalLitres * 1000 >= targetVolumeMl);
+        
+        String response;
+        serializeJson(doc, response);
+        request->send(200, "application/json", response);
+    });
+
+    server.on("/setTarget", HTTP_POST, [](AsyncWebServerRequest *request) {
+        if (request->hasParam("volume", true)) {
+            String volumeStr = request->getParam("volume", true)->value();
+            targetVolumeMl = volumeStr.toFloat();
+            isFillingActive = true;
+            checkInterval = 100;
+            totalLitres = 0.0;
+            
+            String response = "{\"status\":\"ok\",\"target\":\"" + String(targetVolumeMl) + "\"}";
+            request->send(200, "application/json", response);
+            Serial.printf("New target volume set: %.2f ml\n", targetVolumeMl);
+        } else {
+            request->send(400, "text/plain", "Volume parameter required");
+        }
+    });
+
+    server.on("/resetFlow", HTTP_POST, [](AsyncWebServerRequest *request) {
+        totalLitres = 0.0;
+        isFillingActive = false;
+        targetVolumeMl = 0.0;
+        checkInterval = 1000;
+        request->send(200, "application/json", "{\"status\":\"ok\"}");
+        Serial.println("Flow reset requested");
+    });
+
+      server.on("/emergencyStop", HTTP_POST, [](AsyncWebServerRequest *request) {
+        // Set as completed
+        isFillingActive = false;
+        // checkInterval = 100;
+        // Send response indicating emergency stop activated
+        request->send(200, "application/json", "{\"status\":\"ok\",\"message\":\"Emergency stop activated\"}");
+        Serial.println("Emergency stop activated");
+    });
+
+    server.begin();
+    Serial.println("HTTP server started");
+    Serial.println("System ready");
+}
+
+void loop() {
+    static unsigned long lastCheck = millis();
+    
+    if (millis() - lastCheck >= checkInterval) {
+        handleWaterFlow();
+        lastCheck = millis();
+    }
+
+    // Read pH
+    avgVoltagePH = readPHVoltage();
+    if (avgVoltagePH >= 0) {
+        phValue = voltageToPH(avgVoltagePH);
+        if (phValue < 0 || phValue > 14) {
+            phStatus = "Error: Invalid reading";
+        } else if (phValue < 6.5) {
+            phStatus = "Acidic";
+        } else if (phValue > 7.5) {
+            phStatus = "Basic";
+        } else {
+            phStatus = "Neutral";
+        }
+    } else {
+        phValue = -1;
+        phStatus = "Error: Sensor failed";
+    }
+
+    // Read TDS
+    readTDS();
+
+    delay(10);
 }

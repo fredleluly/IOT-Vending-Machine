@@ -68,10 +68,10 @@ WATER_VOLUMES = {
 @dataclass
 class HardwareConfig:
     flow_sensor_pin: int = 26  # Updated to GPIO 26
-    motor_pin: int = 21
-    ir_sensor_pin: int = 23  # <-- Tambahan ini
-    esp32_ip: str = "192.168.137.37"
-    esp32_port: int = 80
+    motor_pin: int = 20
+    ir_sensor_pin: int = 24  # <-- Tambahan ini
+    esp32_ip: str = "192.168.4.1"
+    esp32_port: int = 81
     pulse_per_liter: int = 450  # Calibration factor for flow sensor
 
 import json
@@ -792,26 +792,30 @@ class QRPaymentDialog(QDialog):
 class HardwareController:
     """Manages hardware interactions with proper error handling and simulation support."""
     
-
     def __init__(self):
         self.config = ConfigManager()
         self.is_simulated = not HARDWARE_AVAILABLE
         self._setup_gpio()
-        
+        logger.info(f"HardwareController initialized in {'simulation' if self.is_simulated else 'hardware'} mode")
+
     def _setup_gpio(self):
         """Initialize GPIO with proper error handling."""
         if self.is_simulated:
+            logger.info("Running in simulation mode - GPIO setup skipped")
             return
             
         try:
             GPIO.setmode(GPIO.BCM)
-            GPIO.setup(self.config.hardware_config.flow_sensor_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            # Setup motor pin
             GPIO.setup(self.config.hardware_config.motor_pin, GPIO.OUT)
             GPIO.output(self.config.hardware_config.motor_pin, GPIO.LOW)
+            # Setup IR sensor
+            GPIO.setup(self.config.hardware_config.ir_sensor_pin, GPIO.IN)
             logger.info("GPIO setup completed successfully")
         except Exception as e:
             logger.error(f"Failed to setup GPIO: {e}")
             self.is_simulated = True
+            logger.warning("Falling back to simulation mode")
     
     def start_motor(self):
         """Start the water pump motor."""
@@ -820,7 +824,7 @@ class HardwareController:
             return True
             
         try:
-            GPIO.output(MOTOR_PIN, GPIO.HIGH)
+            GPIO.output(self.config.hardware_config.motor_pin, GPIO.HIGH)
             logger.info("Motor started")
             return True
         except Exception as e:
@@ -834,11 +838,22 @@ class HardwareController:
             return
             
         try:
-            GPIO.output(MOTOR_PIN, GPIO.LOW)
+            GPIO.output(self.config.hardware_config.motor_pin, GPIO.LOW)
             logger.info("Motor stopped")
         except Exception as e:
             logger.error(f"Failed to stop motor: {e}")
-    
+
+    def check_ir_sensor(self) -> bool:
+        """Check IR sensor status."""
+        if self.is_simulated:
+            return True
+            
+        try:
+            return not GPIO.input(self.config.hardware_config.ir_sensor_pin)
+        except Exception as e:
+            logger.error(f"Failed to read IR sensor: {e}")
+            return False
+
     def cleanup(self):
         """Clean up GPIO resources."""
         if self.is_simulated:
@@ -851,7 +866,7 @@ class HardwareController:
             logger.error(f"GPIO cleanup failed: {e}")
 
 class WaterController(QObject):
-    """Controls water dispensing with flow sensor monitoring."""
+    """Controls water dispensing with flow sensor monitoring and WebSocket communication."""
     
     update_progress = pyqtSignal(int)
     filling_complete = pyqtSignal()
@@ -866,172 +881,173 @@ class WaterController(QObject):
         self.is_running = False
         self.target_pulses = 0
         self._lock = threading.Lock()
+        
+        # WebSocket setup
+        self.ws = None
+        # self.setup_websocket()
+        
+        logger.info("WaterController initialized")
 
-
-        # Initialize GPIO for flow sensor
-        if HARDWARE_AVAILABLE:
-            try:
-                GPIO.setup(self.config.hardware_config.flow_sensor_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                logger.info(f"Flow sensor initialized on GPIO {self.config.hardware_config.flow_sensor_pin}")
-            except Exception as e:
-                logger.error(f"Failed to initialize flow sensor: {e}")
-                self.error_occurred.emit("Flow sensor initialization failed")
-
-    def force_shutdown(self):
-        """Force shutdown all hardware components immediately."""
-        logger.info("Forcing immediate hardware shutdown")
+    def setup_websocket(self):
+        """Initialize WebSocket connection to ESP32."""
         try:
-            # Force stop the motor immediately
-            self.is_running = False
-            self._control_esp32_relay(False)
+            import websocket
+            ws_url = f"ws://{self.config.hardware_config.esp32_ip}:81"
+            logger.info(f"Connecting to WebSocket at {ws_url}")
             
-            # Clean up GPIO
-            if HARDWARE_AVAILABLE:
-                try:
-                    GPIO.remove_event_detect(self.config.hardware_config.flow_sensor_pin)
-                    GPIO.cleanup(self.config.hardware_config.flow_sensor_pin)
-                except Exception as e:
-                    logger.error(f"Error during GPIO cleanup: {e}")
-            
-            logger.info("Hardware shutdown completed")
+            self.ws = websocket.WebSocketApp(
+                ws_url,
+                on_message=self.on_ws_message,
+                on_error=self.on_ws_error,
+                on_close=self.on_ws_close,
+                on_open=self.on_ws_open
+            )
+            threading.Thread(target=self.ws.run_forever, daemon=True).start()
         except Exception as e:
-            logger.error(f"Error during force shutdown: {e}")
+            logger.error(f"Failed to setup WebSocket: {e}")
+            self.error_occurred.emit("Failed to connect to ESP32")
 
-    def cleanup(self):
-        """Clean up resources."""
-        logger.info("Starting WaterController cleanup")
-        # First stop any ongoing filling
+    def on_ws_open(self, ws):
+        """Handle WebSocket connection opened."""
+        logger.info("WebSocket connection established")
+
+    def on_ws_message(self, ws, message):
+        """Handle incoming WebSocket messages."""
+        try:
+            data = json.loads(message)
+            # Tambah log untuk melihat semua pesan yang masuk
+            logger.info(f"WebSocket message received: {data}")
+            
+            if "flowComplete" in data and data["flowComplete"]:
+                # Log detail ketika flow complete
+                logger.info(f"Flow complete signal received from ESP32")
+                logger.info(f"Final volume: {data.get('totalVolume', 'unknown')}ml")
+                logger.info("Initiating emergency motor stop")
+                
+                # Immediately stop motor before anything else
+                self.hardware.stop_motor()
+                logger.info("Motor stopped successfully")
+                
+                # Then handle the rest of cleanup
+                self.stop_filling()
+                logger.info("Filling process cleanup completed")
+                    
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse WebSocket message: {e}")
+            logger.error(f"Raw message received: {message}")
+        except Exception as e:
+            logger.error(f"Error handling WebSocket message: {e}")
+
+    def on_ws_error(self, ws, error):
+        """Handle WebSocket errors."""
+        logger.error(f"WebSocket error: {error}")
+        self.error_occurred.emit(f"ESP32 communication error: {str(error)}")
+
+    def on_ws_close(self, ws, close_status_code, close_msg):
+        """Handle WebSocket connection closure."""
+        logger.warning(f"WebSocket connection closed: {close_msg}")
         if self.is_running:
             self.stop_filling()
-        
-        # Then force shutdown hardware
-        self.force_shutdown()
-        logger.info("WaterController cleanup completed")
-
-    def pulse_callback(self, channel):
-        """Handle flow sensor pulse with thread safety."""
-        if not self.is_running:
-            return
-            
-        with self._lock:
-            self.pulse_count += 1
-            progress = min(100, int((self.pulse_count / self.target_pulses) * 100))
-            
-            logger.info(f"Water Flow - Pulses: {self.pulse_count}/{self.target_pulses} | Progress: {progress}%")
-            # Calculate current volume in ml
-            current_volume_ml = (self.pulse_count / self.config.hardware_config.pulse_per_liter) * 1000
-            logger.info(f"Current Volume Dispensed: {current_volume_ml:.2f} ml")
-            
-            self.update_progress.emit(progress)
-            
-            if self.pulse_count >= self.target_pulses:
-                self.stop_filling()
-
-
-    def calculate_target_pulses(self, volume_ml: float) -> int:
-        """Calculate target pulses based on volume and calibration factor."""
-        return int((volume_ml / 1000) * self.config.hardware_config.pulse_per_liter)
-    
+        # Attempt to reconnect after 5 seconds
+        threading.Timer(5.0, self.setup_websocket).start()
 
     def start_filling(self, size: str) -> bool:
         """Start the water filling process for given size."""
         if size not in WATER_VOLUMES:
+            logger.error(f"Invalid size selected: {size}")
             self.error_occurred.emit("Invalid size selected")
             return False
 
         volume = WATER_VOLUMES[size]
-        # Calculate target pulses based on selected volume
-        # self.target_pulses = self.calculate_target_pulses(float(volume.name.split()[0]))
         self.target_pulses = volume.pulses
         self.pulse_count = 0
         self.is_running = True
         
-        logger.info(f"Starting filling process for {size} with target {self.target_pulses} pulses")
+        logger.info(f"Starting filling process for {size}")
         
-        # Activate ESP32 relay
-        if not self._control_esp32_relay(True):
-            self.error_occurred.emit("Failed to activate pump")
-            return False
-        
-        # Start filling process in separate thread
-        threading.Thread(target=self._filling_process, daemon=True).start()
-        return True
-
-
-    def _filling_process(self):
-        """Handle the filling process with proper error handling."""
         try:
-            if HARDWARE_AVAILABLE:
-                GPIO.add_event_detect(
-                    self.config.hardware_config.flow_sensor_pin, 
-                    GPIO.FALLING, 
-                    callback=self.pulse_callback
-                )
-            else:
-                # Simulate flow sensor pulses in simulation mode
-                self._simulate_flow()
-                
-        except Exception as e:
-            logger.error(f"Error in filling process: {e}")
-            self.error_occurred.emit(f"Filling error: {str(e)}")
-            self.stop_filling()
-                
-    
-    def _simulate_flow(self):
-        """Simulate flow sensor pulses when hardware is not available."""
-        while self.is_running and self.pulse_count < self.target_pulses:
-            time.sleep(0.01)  # Simulate 10 pulses per second
-            self.pulse_callback(None)
+            # Send target volume to ESP32
+            if not self.ws or not self.ws.sock:
+                raise ConnectionError("WebSocket not connected")
 
+            # Extract volume in ml from size name
+            target_ml = float(volume.name.split()[0])
+            if "Liter" in volume.name:
+                target_ml *= 1000
+
+            # Send target to ESP32
+            command = {
+                "command": "setTarget",
+                "targetML": target_ml
+            }
+            self.ws.send(json.dumps(command))
+            logger.info(f"Target volume {target_ml}ml sent to ESP32")
+
+            # Start motor via GPIO
+            if not self.hardware.start_motor():
+                raise Exception("Failed to start motor")
+
+            logger.info("Filling process started successfully")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error starting filling process: {e}")
+            self.error_occurred.emit(f"Failed to start filling: {str(e)}")
+            self.stop_filling()
+            return False
 
     def stop_filling(self):
-        """Stop the filling process safely and record sale."""
+        """Stop the filling process safely."""
+        if not self.is_running:
+            return
+            
+        logger.info("Stopping filling process")
         self.is_running = False
         
-        # Deactivate ESP32 relay
-        self._control_esp32_relay(False)
-        
-        if HARDWARE_AVAILABLE:
-            try:
-                GPIO.remove_event_detect(self.config.hardware_config.flow_sensor_pin)
-            except Exception as e:
-                logger.warning(f"Failed to remove event detection: {e}")
-        
-        # Calculate actual volume dispensed
-        actual_volume = (self.pulse_count / self.config.hardware_config.pulse_per_liter) * 1000
-        
-        # Record sale
         try:
-            if hasattr(self, 'current_volume'):
-                sale_data = {
-                    'volume': actual_volume,
-                    'price': self.current_price,
-                    'pulse_count': self.pulse_count
-                }
-                self.api_client.record_sale(sale_data)
-        except Exception as e:
-            logger.error(f"Failed to record sale: {e}")
-        
-        self.filling_complete.emit()
-        logger.info(f"Filling completed. Pulses: {self.pulse_count}/{self.target_pulses}")
-
-    
-    def _control_esp32_relay(self, state: bool) -> bool:
-        """Control ESP32 relay via HTTP request."""
-        try:
-            url = f"http://{self.config.hardware_config.esp32_ip}:{self.config.hardware_config.esp32_port}/toggleRelay"
-            response = requests.get(url, timeout=5)
+            # Stop motor immediately
+            self.hardware.stop_motor()
+            logger.info("Motor stopped")
             
-            if response.status_code == 200:
-                logger.info(f"Relay {'activated' if state else 'deactivated'} successfully")
-                return True
-            else:
-                logger.error(f"Failed to control relay: HTTP {response.status_code}")
-                return False
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error controlling ESP32 relay: {e}")
-            return False
+            # Record sale if needed
+            if hasattr(self, 'current_volume'):
+                try:
+                    sale_data = {
+                        'volume': self.current_volume,
+                        'price': self.current_price,
+                        'pulse_count': self.pulse_count
+                    }
+                    self.api_client.record_sale(sale_data)
+                    logger.info("Sale recorded successfully")
+                except Exception as e:
+                    logger.error(f"Failed to record sale: {e}")
+            
+            self.filling_complete.emit()
+            
+        except Exception as e:
+            logger.error(f"Error during filling stop: {e}")
+            self.error_occurred.emit(f"Error stopping fill: {str(e)}")
+        finally:
+            # Ensure motor is stopped even if errors occur
+            try:
+                self.hardware.stop_motor()
+            except Exception as e:
+                logger.error(f"Failed to ensure motor stop: {e}")
+
+    def cleanup(self):
+        """Clean up resources."""
+        logger.info("Starting WaterController cleanup")
+        try:
+            if self.is_running:
+                self.stop_filling()
+            
+            # if self.ws:
+            #     self.ws.close()
+            
+            self.hardware.cleanup()
+            logger.info("WaterController cleanup completed")
+        except Exception as e:
+            logger.error(f"Error during cleanup: {e}")
 
 class VideoThread(QThread):
     frame_ready = pyqtSignal(QImage)
@@ -1085,14 +1101,6 @@ class VideoThread(QThread):
         with QMutexLocker(self.mutex):
             self.running = False
 
-import websocket
-import json
-import threading
-import time
-import logging
-from PyQt5.QtCore import QThread, QObject, pyqtSignal
-
-# Class SensorThread yang sudah diupdate untuk WebSocket
 class SensorThread(QThread):
     sensor_updated = pyqtSignal(dict)
     
@@ -1103,97 +1111,59 @@ class SensorThread(QThread):
         self.esp32_ip = esp32_ip
         self.running = True
         self._last_successful_data = None
-        self._ws = None
-        self._reconnect_delay = 2
-        self._max_reconnect_delay = 30
-        self._lock = threading.Lock()
         
-    def _on_message(self, ws, message):
-        try:
-            data = json.loads(message)
-            if data.get('type') == 'heartbeat':
-                return
-            with self._lock:
-                self._last_successful_data = data
-            self.sensor_updated.emit(data)
-        except json.JSONDecodeError as e:
-            logger.error(f"Error decoding WebSocket message: {e}")
-        except Exception as e:
-            logger.error(f"Error handling WebSocket message: {e}")
-
-    def _on_error(self, ws, error):
-        logger.error(f"WebSocket error: {error}")
-        if self._last_successful_data:
-            self.sensor_updated.emit({
-                **self._last_successful_data,
-                'stale': True
-            })
-        else:
-            self.sensor_updated.emit({'error': True})
-
-    def _on_close(self, ws, close_status_code, close_msg):
-        logger.warning(f"WebSocket connection closed: {close_status_code} - {close_msg}")
-        if self.running:
-            time.sleep(min(self._reconnect_delay, self._max_reconnect_delay))
-            self._reconnect_delay *= 2
-            self._connect_websocket()
-
-    def _on_open(self, ws):
-        logger.info("WebSocket connection established")
-        self._reconnect_delay = 2
-
-    def _connect_websocket(self):
-        if not self.running:
-            return
-        try:
-            ws_url = f"ws://{self.config.hardware_config.esp32_ip}:{self.config.hardware_config.esp32_port}"
-            self._ws = websocket.WebSocketApp(
-                ws_url,
-                on_message=self._on_message,
-                on_error=self._on_error,
-                on_close=self._on_close,
-                on_open=self._on_open
-            )
-            self._ws_thread = threading.Thread(
-                target=self._ws.run_forever,
-                kwargs={'ping_interval': 30, 'ping_timeout': 10}
-            )
-            self._ws_thread.daemon = True
-            self._ws_thread.start()
-        except Exception as e:
-            logger.error(f"Error establishing WebSocket connection: {e}")
-            self.sensor_updated.emit({'error': True})
-
     def run(self):
-        try:
-            self._connect_websocket()
-            while self.running:
-                time.sleep(1)
-                if not self._ws or not self._ws_thread.is_alive():
-                    logger.warning("WebSocket connection lost, attempting reconnection")
-                    self._connect_websocket()
-        except Exception as e:
-            logger.error(f"Error in sensor thread main loop: {e}")
-            self.sensor_updated.emit({'error': True})
-
-    def cleanup(self):
-        logger.info("Cleaning up sensor thread")
-        self.stop()
-        if self._ws:
+        """Main thread loop for polling sensor data"""
+        while self.running:
             try:
-                self._ws.close()
-            except:
-                pass
-        if not self.wait(5000):
-            logger.warning("Sensor thread cleanup timeout, forcing termination")
+                # Get sensor data from ESP32
+                response = requests.get(
+                    f"http://{self.config.hardware_config.esp32_ip}/data",
+                    timeout=1
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    # Update last successful data
+                    self._last_successful_data = data
+                    # Emit signal with new data
+                    self.sensor_updated.emit(data)
+                else:
+                    if self._last_successful_data:
+                        self.sensor_updated.emit({
+                            **self._last_successful_data,
+                            'stale': True
+                        })
+                    else:
+                        self.sensor_updated.emit({'error': True})
+                        
+            except requests.exceptions.RequestException as e:
+                logger.error(f"ESP32 connection error: {e}")
+                if self._last_successful_data:
+                    self.sensor_updated.emit({
+                        **self._last_successful_data,
+                        'stale': True
+                    })
+                else:
+                    self.sensor_updated.emit({'error': True})
+            except Exception as e:
+                logger.error(f"Unexpected error: {e}")
+                self.sensor_updated.emit({'error': True})
+            
+            # Wait before next update
+            time.sleep(self.config.app_config.update_interval)
+    
+    def cleanup(self):
+        """Clean up thread resources"""
+        self.stop()
+        if not self.wait(5000):  # 5 second timeout
             self.terminate()
             self.wait()
     
     def stop(self):
-        logger.info("Stopping sensor thread")
+        """Stop the thread safely"""
         self.running = False
 
-# Class WaterController yang diupdate untuk menggunakan WebSocket
 class WaterController(QObject):
     update_progress = pyqtSignal(int)
     filling_complete = pyqtSignal()
@@ -1204,85 +1174,113 @@ class WaterController(QObject):
         self.config = ConfigManager()
         self.hardware = HardwareController()
         self.api_client = APIClient()
-        self.pulse_count = 0
         self.is_running = False
-        self.target_pulses = 0
-        self._lock = threading.Lock()
-        self._ws = None
-        self._setup_websocket()
+        self.target_volume = 0
+        
+        # Status check timer
+        self.status_timer = QTimer()
+        self.status_timer.timeout.connect(self.check_flow_status)
+        logger.info("WaterController initialized")
 
-    def _setup_websocket(self):
+    def check_flow_status(self):
+        if not self.is_running:
+            return
         try:
-            ws_url = f"ws://{self.config.hardware_config.esp32_ip}:{self.config.hardware_config.esp32_port}"
-            self._ws = websocket.WebSocketApp(
-                ws_url,
-                on_message=self._on_ws_message,
-                on_error=self._on_ws_error,
-                on_close=self._on_ws_close
-            )
-            self._ws_thread = threading.Thread(target=self._ws.run_forever)
-            self._ws_thread.daemon = True
-            self._ws_thread.start()
+            response = requests.get(f"http://{self.config.hardware_config.esp32_ip}/data", timeout=0.5)
+            data = response.json()
+            logger.info(f"Flow status: {data}")
+            current_volume = float(data.get('totalLitres', 0)) * 1000  # Convert L to mL
+            progress = min(100, int((current_volume / self.target_volume) * 100))
+            self.update_progress.emit(progress)
+            if data.get('completed', False):
+                logger.info("Flow complete signal received")
+                self.hardware.stop_motor()
+                logger.info("Emergency motor stop triggered")
+                self.stop_filling()
         except Exception as e:
-            logger.error(f"Failed to setup WebSocket: {e}")
+            logger.error(f"Error checking flow status: {e}")
 
-    def _on_ws_message(self, ws, message):
-        try:
-            data = json.loads(message)
-            if 'flowRate' in data:
-                self._update_flow_data(data)
-        except Exception as e:
-            logger.error(f"Error processing WebSocket message: {e}")
-
-    def _update_flow_data(self, data):
-        with self._lock:
-            try:
-                flow_rate = float(data.get('flowRate', 0))
-                if self.is_running and flow_rate > 0:
-                    # Update pulse count based on flow rate
-                    self.pulse_count = int(flow_rate * self.config.hardware_config.pulse_per_liter)
-                    progress = min(100, int((self.pulse_count / self.target_pulses) * 100))
-                    self.update_progress.emit(progress)
-                    
-                    if self.pulse_count >= self.target_pulses:
-                        self.stop_filling()
-            except Exception as e:
-                logger.error(f"Error updating flow data: {e}")
-
-    def _on_ws_error(self, ws, error):
-        logger.error(f"WebSocket error: {error}")
-
-    def _on_ws_close(self, ws, close_status_code, close_msg):
-        logger.warning("WebSocket connection closed")
-        if self.is_running:
-            self._setup_websocket()
-
-    def _control_esp32_relay(self, state: bool) -> bool:
-        try:
-            if self._ws and self._ws.sock and self._ws.sock.connected:
-                command = "toggleRelay"
-                self._ws.send(command)
-                return True
-            else:
-                logger.error("WebSocket not connected")
-                return False
-        except Exception as e:
-            logger.error(f"Error controlling relay via WebSocket: {e}")
+    def start_filling(self, size: str) -> bool:
+        """Start the water filling process."""
+        if size not in WATER_VOLUMES:
+            logger.error(f"Invalid size selected: {size}")
+            self.error_occurred.emit("Invalid size selected")
             return False
 
-    def cleanup(self):
-        logger.info("Starting WaterController cleanup")
-        if self.is_running:
+        try:
+            # Calculate target volume in ml
+            volume = WATER_VOLUMES[size]
+            target_ml = float(volume.name.split()[0])
+            if "Liter" in volume.name:
+                target_ml *= 1000
+
+            self.target_volume = target_ml
+            self.is_running = True
+
+            # Send target to ESP32
+            response = requests.post(
+                f"http://{self.config.hardware_config.esp32_ip}/setTarget",
+                data={'volume': target_ml},
+                timeout=1
+            )
+            
+            if response.status_code != 200:
+                raise Exception(f"ESP32 returned error: {response.text}")
+            
+            # Start motor
+            if not self.hardware.start_motor():
+                raise Exception("Failed to start motor")
+
+            # Start status checking every 100ms
+            self.status_timer.start(100)
+            logger.info(f"Filling started for {size} ({target_ml}ml)")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error starting filling: {e}")
+            self.error_occurred.emit(str(e))
             self.stop_filling()
-        if self._ws:
+            return False
+
+    def stop_filling(self):
+        """Stop the filling process."""
+        if not self.is_running:
+            return
+
+        logger.info("Stopping fill process")
+        self.is_running = False
+        self.status_timer.stop()
+
+        try:
+            # Stop motor
+            self.hardware.stop_motor()
+            logger.info("Motor stopped")
+
+            # Reset ESP32 flow counter
+            requests.post(f"http://{self.config.hardware_config.esp32_ip}/resetFlow")
+            logger.info("Flow counter reset")
+
+            self.filling_complete.emit()
+
+        except Exception as e:
+            logger.error(f"Error stopping fill: {e}")
+        finally:
+            # Ensure motor is stopped
             try:
-                self._ws.close()
+                self.hardware.stop_motor()
             except:
                 pass
-        self.force_shutdown()
-        logger.info("WaterController cleanup completed")
 
-    # ... rest of the WaterController methods remain the same ...
+    def cleanup(self):
+        """Clean up resources."""
+        logger.info("Starting cleanup")
+        try:
+            if self.is_running:
+                self.stop_filling()
+            self.status_timer.stop()
+            self.hardware.cleanup()
+        except Exception as e:
+            logger.error(f"Error during cleanup: {e}")
 
 class WaterButton(QPushButton):
     def __init__(self, size_text, price_text, image_path, parent=None):
