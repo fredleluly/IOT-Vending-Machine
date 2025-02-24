@@ -334,7 +334,7 @@ class ThankYouDialog(QDialog):
         super().__init__(parent)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         # self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setStyleSheet("background-color: transparent;")
+        # self.setStyleSheet("background-color: transparent;")
         self.setup_ui()
         
         # Auto-close timer
@@ -1349,15 +1349,52 @@ class MonitoringWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.config = ConfigManager()
+        self.api_client = APIClient()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.setMinimumHeight(150)
         
+
+
+        # Tambahkan timer untuk record quality
+        self.record_timer = QTimer()
+        self.record_timer.timeout.connect(self.record_quality_data)
+        self.record_timer.start(5 * 60 * 1000)  # 5 menit dalam milliseconds
+        
         self.setup_ui()
-        self.setup_sensor_thread()
+        self.setup_sensor_thread()  
         
         # Register for cleanup if parent is WaterSustainabilityApp
         if isinstance(parent, WaterSustainabilityApp):
             parent.register_cleanup(self)
+
+    
+    def record_quality_data(self):
+        """Record quality data every 5 minutes"""
+        try:
+            if hasattr(self, 'ph_value') and hasattr(self, 'tds_value'):
+                ph_text = self.ph_value.text()
+                tds_text = self.tds_value.text()
+                
+                # Skip jika sensor tidak terhubung
+                if ph_text == "Not Connected" or tds_text == "Not Connected":
+                    return
+                    
+                # Kirim data ke backend
+                success = self.api_client.record_quality({
+                    'ph_level': float(ph_text),
+                    'tds_level': float(tds_text),
+                    'water_level': 0,
+                    # 'timestamp': datetime.now().isoformat()
+                })
+                if not success:
+                    logger.warning("Quality data ARE NOT ***=123=***recorded successfully")
+                else:
+                    logger.info("Quality data recorded successfully")
+
+                
+        except Exception as e:
+            logger.error(f"Failed to record quality data: {e}")
+
 
     def setup_ui(self):
         layout = QVBoxLayout()
@@ -1452,6 +1489,8 @@ border: 1px solid #E9ECEF;
                     tds_value = data.get('tds', 'Error')
                     self.ph_value.setText(f"{ph_value}")
                     self.tds_value.setText(f"{tds_value}")
+
+                    
         except Exception as e:
             logger.error(f"Error updating sensor display: {e}")
     
@@ -1594,126 +1633,18 @@ class MachineWidget(QWidget):
         machine_layout.addWidget(self.start_button, alignment=Qt.AlignCenter)
         
         return machine_display
-    
+
     def start_filling_animation(self):
-        """Start the water filling process with proper error handling"""
-        try:
-            if not self.is_filling and hasattr(self, 'selected_size'):
-                logger.info(f"Starting fill process for size: {self.selected_size}")
+        """Start the water filling process"""
+        if not self.is_filling and hasattr(self, 'selected_size'):
+            success = self.water_controller.start_filling(self.selected_size)
+            if success:
+                self.is_filling = True
+                self.progress = 0
+                self.start_button.setEnabled(False)
+                self.start_button.setText("Filling...")
+                self.progress_indicator.setStyleSheet("color: #E74C3C; font-size: 24px;")
                 
-                # Validate hardware status
-                if not self.check_hardware_ready():
-                    raise Exception("Hardware not ready")
-                
-                success = self.water_controller.start_filling(self.selected_size)
-                if success:
-                    self.is_filling = True
-                    self.progress = 0
-                    self.update_ui_filling_started()
-                    self.start_status_monitoring()
-                else:
-                    raise Exception("Failed to start filling process")
-                    
-        except Exception as e:
-            logger.error(f"Error starting fill process: {e}")
-            self.handle_filling_error(str(e))
-
-
-    def check_hardware_ready(self) -> bool:
-        """Check if hardware is ready for filling"""
-        try:
-            # Check ESP32 connection
-            response = requests.get(
-                f"http://{self.config.hardware_config.esp32_ip}/data",
-                timeout=0.5
-            )
-            if response.status_code != 200:
-                return False
-                
-            # Check other hardware status as needed
-            return True
-        except Exception as e:
-            logger.error(f"Hardware check failed: {e}")
-            return False
-
-    def update_ui_filling_started(self):
-        """Update UI elements when filling starts"""
-        try:
-            self.start_button.setEnabled(False)
-            self.start_button.setText("Filling...")
-            self.progress_indicator.setStyleSheet("color: #E74C3C; font-size: 24px;")
-        except Exception as e:
-            logger.error(f"Failed to update UI: {e}")
-
-    def start_status_monitoring(self):
-        """Start monitoring fill status"""
-        try:
-            self.check_status_timer = QTimer()
-            self.check_status_timer.timeout.connect(self.check_filling_status)
-            self.check_status_timer.start(1000)  # Check every second
-            logger.info("Status monitoring started")
-        except Exception as e:
-            logger.error(f"Failed to start status monitoring: {e}")
-            self.handle_filling_error("Failed to monitor status")
-
-    def check_filling_status(self):
-        """Check if filling is complete with proper error handling"""
-        if not self.is_filling:
-            return
-            
-        try:
-            response = requests.get(
-                f"http://{self.config.hardware_config.esp32_ip}/data",
-                timeout=0.5
-            )
-            data = response.json()
-            
-            # Validate response data
-            if not isinstance(data, dict):
-                raise ValueError("Invalid response format")
-                
-            if data.get('completed', False):
-                logger.info("Filling completed successfully")
-                self.safe_stop_monitoring()
-                self.complete_filling()
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Network error checking status: {e}")
-            self.handle_filling_error("Lost connection to ESP32")
-        except Exception as e:
-            logger.error(f"Error checking filling status: {e}")
-            self.handle_filling_error(str(e))
-
-    def safe_stop_monitoring(self):
-        """Safely stop status monitoring"""
-        try:
-            if hasattr(self, 'check_status_timer'):
-                self.check_status_timer.stop()
-                logger.info("Status monitoring stopped")
-        except Exception as e:
-            logger.error(f"Error stopping monitoring: {e}")
-
-    def handle_filling_error(self, error_msg: str):
-        """Handle errors during filling process"""
-        logger.error(f"Filling error: {error_msg}")
-        try:
-            self.safe_stop_monitoring()
-            self.water_controller.stop_filling()  # Emergency stop
-            self.is_filling = False
-            self.update_ui_error_state(error_msg)
-            # QMessageBox.warning(self, "Error", f"Filling error: {error_msg}")
-        except Exception as e:
-            logger.critical(f"Error handling failure: {e}")
-
-    def update_ui_error_state(self, error_msg: str):
-        """Update UI to error state"""
-        try:
-            self.start_button.setEnabled(True)
-            self.start_button.setText("Start Filling")
-            self.progress_indicator.setStyleSheet("color: #E74C3C; font-size: 24px;")
-        except Exception as e:
-            logger.error(f"Failed to update UI error state: {e}")
-
 
     def update_progress(self, progress):
         """Update progress bar visualization"""
@@ -2108,9 +2039,7 @@ class WaterSustainabilityApp(QMainWindow):
             logger.error(f"Error during application shutdown: {e}")
             self.force_cleanup()
             event.accept()
-
     def _record_transaction(self, success: bool):
-        """Record transaction details for monitoring"""
         try:
             if hasattr(self, 'last_transaction'):
                 transaction_data = {
@@ -2118,14 +2047,18 @@ class WaterSustainabilityApp(QMainWindow):
                     'success': success
                 }
                 
-                # Here you could:
-                # 1. Send to your backend API
-                # 2. Store in local database
-                # 3. Update transaction history
+                # Record sale data
+                self.api_client.record_sale({
+                    'volume': self.last_transaction['size'],
+                    'order_id': self.last_transaction['order_id'], 
+                    'timestamp': self.last_transaction['timestamp'],
+                    'success': success
+                })
                 
-                logger.info(f"Transaction recorded: {transaction_data}")
+                
+                logger.info(f"Transaction and quality data recorded: {transaction_data}")
         except Exception as e:
-            logger.error(f"Error recording transaction: {e}")
+            logger.error(f"Error recording transaction and quality data: {e}")
 
     def register_cleanup(self, handler):
         """Register objects that need cleanup"""
