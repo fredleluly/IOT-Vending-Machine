@@ -29,8 +29,11 @@ ALLOWED_HOSTS = [
     "localhost",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "*"
+    "*",
+'148.135.137.56',
+'innovativeaquasolution.com', 'www.innovativeaquasolution.com', '127.0.0.1', 'localhost'
 ]
+
 
 
 # Tambahkan REST Framework settings

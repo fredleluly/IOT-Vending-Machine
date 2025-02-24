@@ -12,6 +12,8 @@ router.register(r'machines', views.VendingMachineViewSet)
 
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.MachineListView.as_view(), name='machine_list'),
@@ -23,4 +25,4 @@ urlpatterns = [
          views.VendingMachineViewSet.as_view({'get': 'quality_history'}),
          name='machine-quality-history'),
          
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
